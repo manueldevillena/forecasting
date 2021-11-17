@@ -73,7 +73,7 @@ def numpy_to_torch(array):
     return torch.tensor(array.astype(np.float), dtype=torch.float32)
 
 
-def create_linear_network(input_size, layers, act_fun):
+def create_linear_network(input_size, layers, activation):
     """
     Creates a linear neural network.
     Args:
@@ -88,7 +88,7 @@ def create_linear_network(input_size, layers, act_fun):
     for n_neurons in layers:
         # linear layers
         net_layers.append(torch.nn.Linear(input_size, n_neurons))
-        net_layers.append(act_fun.__class__())
+        net_layers.append(activation.__class__())
         input_size = n_neurons
 
     return net_layers

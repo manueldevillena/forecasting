@@ -11,9 +11,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     inputs = ForecastInputData(path_inputs=args.input_data)
-    features = FeatureCreation(inputs.inputs, targets=None, shift=3)
+    features = FeatureCreation(inputs.inputs, targets=None, shift=24)
 
-    network = FeedForwardRegression(features.x, features.y, num_epochs=100)
+    network = FeedForwardRegression(features.x, features.y, layers=(512, 512, 512), batch_size=48, num_epochs=50)
     network.fit()
     y = network.predict(features.x)
 

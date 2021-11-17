@@ -16,8 +16,7 @@ class FeedForwardRegressor(torch.nn.Module):
         :param input_size: Number of features per sample
         :param output_size: Number of targets
         :param layers: Shape of the net
-        :param act_fun: Activation function applied to each layer
-        :param init_w: Init. value of the weights
+        :param activation: Activation function applied to each layer
         """
         super(FeedForwardRegressor, self).__init__()
         self.input_size = input_size
@@ -54,7 +53,7 @@ class FeedForwardRegression(TorchNeuralNetwork):
     """
     def __init__(self, x: np.ndarray, y: np.ndarray, input_scaler: str = None, target_scaler: str = None,
                  percentage_train: float = 0.7, batch_size: int = 24, num_epochs: int = 25, activation: str = 'relu',
-                 device: str = 'cpu', lr: float = 0.001, layers: tuple = (10,)):
+                 device: str = 'cpu', lr: float = 0.01, layers: tuple = (10,)):
         """
         Constructor.
         """
