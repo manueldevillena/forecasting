@@ -2,11 +2,13 @@ import numpy as np
 import pandas as pd
 import torch
 
-# import yaml
-# try:
-#     from yaml import CLoader as Loader, CDumper as Dumper
-# except ImportError:
-#     from yaml import Loader, Dumper
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+import yaml
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
 
 
 class ParsingException(Exception):
@@ -18,7 +20,7 @@ class ParsingException(Exception):
         return "Invalid values at indexes:\n\t" + '\n\t'.join(map(str, self.indexes))
 
 
-def read_data(data_path: str) -> pd.DataFrame:
+def read_inputs(data_path: str) -> pd.DataFrame:
     """
     Reads CSV file returning an object.
 
@@ -32,7 +34,7 @@ def read_data(data_path: str) -> pd.DataFrame:
     return df
 
 
-def read_inputs(inputs_path: str) -> dict:
+def read_config(inputs_path: str) -> dict:
     """
     Reads YML file with inputs.
     :param inputs_path: Path to the inputs file.
@@ -43,7 +45,7 @@ def read_inputs(inputs_path: str) -> dict:
     return data
 
 
-def infer_activation(activation):
+def infer_activation(activation: str):
     """
     Maps the activation function to the given string.
     Args:
@@ -59,6 +61,52 @@ def infer_activation(activation):
     }
 
     return activations[activation.lower()]
+
+
+def infer_optimizer(model: object):
+    """
+    Maps the optimizer string given to the appropriate optimizer.
+    Args:
+        model: Model with info of the optimizer to use
+
+    Returns:
+        Optimizer to use
+    """
+    optimizers = {
+        'adam': torch.optim.Adam(model.parameters(), lr=model.learning_rate)
+    }
+    return optimizers[model.optimizer]
+
+
+def infer_criterion(criterion: str):
+    """
+    Maps the criterion string given to the appropriate criterion.
+    Args:
+        model: Model with info of the criterion to use
+
+    Returns:
+        Criterion to use
+    """
+    criteria = {
+        'mse': torch.nn.MSELoss()
+    }
+    return criteria[criterion]
+
+
+def infer_scaler(scaler):
+    """
+    Maps the scaler sring given to the appropriate scaler.
+    Args:
+        scaler:
+
+    Returns:
+        Scaler to use
+    """
+    scalers = {
+        'standard': StandardScaler(),
+        'minmax': MinMaxScaler()
+    }
+    return scalers[scaler]
 
 
 def numpy_to_torch(array):

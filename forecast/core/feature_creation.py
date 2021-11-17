@@ -1,44 +1,87 @@
 import pandas as pd
 
+from forecast.core import ForecastInputData
+from forecast.utils import infer_scaler
 
 class InvalidInputsError(Exception):
     pass
 
 
-class FeatureCreation:
+class FeatureCreation(ForecastInputData):
     """
     Creates the features.
     """
-    def __init__(self, inputs: pd.DataFrame, targets: str = None, shift: int = 24):
+    def __init__(self, path_inputs: str, path_config: str, targets: pd.DataFrame = None):
         """
         Constructor.
         """
+        super().__init__(path_inputs, path_config)
+        self.shift = self.config['shift']
+        self.percentage_train = self.config['pertentage_train']
+        self.scaler_inputs = infer_scaler(self.config['scaler_inputs'])
+        self.scaler_targets = infer_scaler(self.config['scaler_targets'])
+
         if targets is not None:
-            self.x_raw = inputs.drop(targets)
-            self.y_raw = inputs[targets]
-        if not targets and shift > 0:
-            self.x_raw = inputs
-            self.y_raw = inputs
+            self.X_raw = self.data.drop(targets)
+            self.y_raw = self.data[targets]
+        if not targets and self.shift > 0:
+            self.X_raw = self.data
+            self.y_raw = self.data
         else:
             raise InvalidInputsError("There should be independent targets or a shift to create autoregressive models.")
 
-        self.shift = shift
-        self.x, self.y = self._create_features()
-
     def _create_features(self):
+        """
+        Creates the features to be used in the training and testing.
+        """
+        X, y = self._define_inputs_targets()
+        X_scaled, y_scaled = self._scale_data(X, y)
+        X_train, y_train, X_test, y_test = self._split_train_test(X_scaled, y_scaled)
+
+    def _define_inputs_targets(self):
         """
         Creates features.
         """
         if self.shift > 0:
-            x_columns = pd.DataFrame()
+            X_columns = pd.DataFrame()
             for t in range(self.shift):
-                x_columns[t] = self.x_raw.shift(periods=-t)
+                X_columns[t] = self.X_raw.shift(periods=-t)
             y_column = self.y_raw.shift(periods=-t-1)
-            x = x_columns.values[:-t-1]
+            X = X_columns.values[:-t-1]
             y = y_column.values[:-t-1]
         else:
             # TODO: add features in addition to shifting
-            x = self.x_raw.values
+            X = self.X_raw.values
             y = self.y_raw.values
 
-        return x, y
+        return X, y
+
+    def _scale_data(self, X, y):
+        """
+        Scales the features.
+        """
+        X_scaled = self.scaler_inputs.fit_transform(X)
+        y_scaled = self.scaler_targets.fit_transform(y)
+
+    def _split_train_test(self, X, y):
+        """
+        Splits the inputs and targets into train and test.
+        Args:
+            X: Inputs
+            y: Targets
+            percentage_train: Percentage of train set
+
+        Returns:
+            Splits X_train, y_train, X_test, y_test
+        """
+        indices = list(range(len(X)))
+        indices_train = indices[:int(self.percentage_train * len(indices))]
+        indices_test = indices[int((self.percentage_train) * len(indices)):]
+        X_train = X[indices_train]
+        y_train = y[indices_train]
+        X_test = X[indices_test]
+        y_test = y[indices_test]
+
+        return X_train, y_train, X_test, y_test
+
+

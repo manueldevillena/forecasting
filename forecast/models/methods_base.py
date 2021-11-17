@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from forecast.utils import numpy_to_torch
 
 
-class BaseModel(ABC):
+class MethodsBase(ABC):
     """
     Generic model establishing the interface.
     """
@@ -26,6 +26,28 @@ class BaseModel(ABC):
         self.y = self.scale_targets(y)
         self.percentage_train = percentage_train
         self.data_sets = self._create_datasets_dic()
+
+    @staticmethod
+    def _train_test_split(X, y, percentage_train):
+        """
+        Splits the inputs and targets into train and test.
+        Args:
+            X: Inputs
+            y: Targets
+            percentage_train: Percentage of train set
+
+        Returns:
+            Splits X_train, y_train, X_test, y_test
+        """
+        indices = list(range(len(X)))
+        indices_train = indices[:int(percentage_train * len(indices))]
+        indices_eval = indices[int((percentage_train) * len(indices)):]
+        X_train = X[indices_train]
+        y_train = y[indices_train]
+        X_test = X[indices_eval]
+        y_test = y[indices_eval]
+
+        return X_train, y_train, X_test, y_test
 
     @abstractmethod
     def fit(self):
@@ -125,24 +147,4 @@ class BaseModel(ABC):
 
         return {"train": [x_train, y_train], "val": [x_val, y_val]}
 
-    @staticmethod
-    def _train_test_split(X, y, percentage_train):
-        """
-        Splits the inputs and targets into train and test (or validation).
-        Args:
-            X: Inputs
-            y: Targets
-            percentage_train: Percentage of train set
 
-        Returns:
-            Splits X_train, y_train, X_test, y_test
-        """
-        indices = list(range(len(X)))
-        indices_train = indices[:int(percentage_train * len(indices))]
-        indices_eval = indices[int((percentage_train) * len(indices)):]
-        X_train = X[indices_train]
-        y_train = y[indices_train]
-        X_test = X[indices_eval]
-        y_test = y[indices_eval]
-
-        return X_train, y_train, X_test, y_test

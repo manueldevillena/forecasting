@@ -1,2 +1,2 @@
-from .torch_neural_network import TorchNeuralNetwork
-from .feed_forward_network import FeedForwardRegression
+from .methods_torch import MethodsTorch
+from .torch_lstm import TorchLSTM

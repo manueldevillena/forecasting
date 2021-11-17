@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
         loss.backward()  # calculates the loss of the loss function
 
-        optimizer.step()  # improve from loss, i.e., backprop
+        optimizer.step()  # improve from loss, i.e., backpropagation
         if epoch % 100 == 0:
             print("Epoch: %d, loss: %1.5f" % (epoch, loss.item()))
 

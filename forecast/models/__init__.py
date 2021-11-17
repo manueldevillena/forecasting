@@ -1,2 +1,2 @@
-from .base_model import BaseModel
-from .models_pytorch import FeedForwardRegression
+from .methods_base import MethodsBase
+from .models_pytorch import TorchLSTM

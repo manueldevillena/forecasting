@@ -1,22 +1,30 @@
 import pandas as pd
 
-from forecast.utils import read_data
+from forecast.utils import read_inputs, read_config
 
 
 class ForecastInputData:
     """
     Loads the input data of the simulation.
     """
-
-    def __init__(self, path_inputs: str, start_date: str = '01-01-2017', end_date: str = '31-07-2020', freq: str = 'H'):
+    def __init__(self, path_inputs: str, path_config: str,
+                 start_date: str = '01-01-2017', end_date: str = '31-07-2020', freq: str = 'H'):
         """
         Constructor.
+
+        Args:
+            path_inputs: Path to input csv file
+            path_config: Path to input configuration yml file
+            start_date: Start date of the simulation
+            end_date: End date of the simulation
+            freq: Frequancy desired for the simulation
         """
-        self.raw_inputs = read_data(path_inputs)
+        self.raw_inputs = read_inputs(path_inputs)
         self.start_date = start_date
         self.end_date = end_date
         self.freq = freq
-        self.inputs = self._clean_data()
+        self.data = self._clean_data()
+        self.config = read_config(path_config)
 
     def _clean_data(self) -> pd.DataFrame:
         """
