@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 import pandas as pd
 import torch
@@ -140,3 +141,30 @@ def create_linear_network(input_size, layers, activation):
         input_size = n_neurons
 
     return net_layers
+
+def set_up_logger(path, log_in_file=True):
+    """
+    Sets up the logger.
+    Args:
+        path:
+        log_in_file:
+
+    Returns:
+
+    """
+    logFormatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    rootLogger = logging.getLogger()
+
+    if rootLogger.hasHandlers():
+        for hdlr in rootLogger.handlers[:]:  # remove all old handlers
+            rootLogger.removeHandler(hdlr)
+    if log_in_file:
+        fileHandler = logging.FileHandler('{0}/logfile.log'.format(path))
+        fileHandler.setFormatter(logFormatter)
+        rootLogger.addHandler(fileHandler)
+
+    consoleHandler = logging.StreamHandler()
+    consoleHandler.setFormatter(logFormatter)
+    rootLogger.addHandler(consoleHandler)
+    rootLogger.setLevel(logging.INFO)
+    return rootLogger

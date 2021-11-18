@@ -3,6 +3,7 @@ import pandas as pd
 from forecast.core import ForecastInputData
 from forecast.utils import infer_scaler
 
+
 class InvalidInputsError(Exception):
     pass
 
@@ -30,13 +31,24 @@ class FeatureCreation(ForecastInputData):
         else:
             raise InvalidInputsError("There should be independent targets or a shift to create autoregressive models.")
 
-    def _create_features(self):
+        self.features = self._create_features()
+
+    def _create_features(self) -> dict:
         """
         Creates the features to be used in the training and testing.
         """
         X, y = self._define_inputs_targets()
         X_scaled, y_scaled = self._scale_data(X, y)
         X_train, y_train, X_test, y_test = self._split_train_test(X_scaled, y_scaled)
+
+        features = {
+            'X_train': X_train,
+            'y_train': y_train,
+            'X_test': X_test,
+            'y_test': y_test
+        }
+
+        return features
 
     def _define_inputs_targets(self):
         """
@@ -48,7 +60,7 @@ class FeatureCreation(ForecastInputData):
                 X_columns[t] = self.X_raw.shift(periods=-t)
             y_column = self.y_raw.shift(periods=-t-1)
             X = X_columns.values[:-t-1]
-            y = y_column.values[:-t-1]
+            y = y_column.values[:-t-1].reshape(-1, 1)
         else:
             # TODO: add features in addition to shifting
             X = self.X_raw.values
@@ -56,14 +68,16 @@ class FeatureCreation(ForecastInputData):
 
         return X, y
 
-    def _scale_data(self, X, y):
+    def _scale_data(self, X, y) -> tuple:
         """
         Scales the features.
         """
         X_scaled = self.scaler_inputs.fit_transform(X)
         y_scaled = self.scaler_targets.fit_transform(y)
 
-    def _split_train_test(self, X, y):
+        return X_scaled, y_scaled
+
+    def _split_train_test(self, X, y) -> tuple:
         """
         Splits the inputs and targets into train and test.
         Args:
@@ -83,5 +97,3 @@ class FeatureCreation(ForecastInputData):
         y_test = y[indices_test]
 
         return X_train, y_train, X_test, y_test
-
-
