@@ -1,2 +1,2 @@
-from .methods_base import MethodsBase
+from .base_model import BaseModel
 from .models_pytorch import TorchLSTM

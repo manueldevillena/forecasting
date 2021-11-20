@@ -6,11 +6,11 @@ import torch.nn as nn
 from torch.autograd import Variable
 
 from forecast.core import FeatureCreation
-from forecast.driver import System
+from forecast.models.models_pytorch import BaseModelTorch
 from forecast.utils import infer_optimizer, infer_criterion
 
 
-class TorchLSTM(nn.Module, System):
+class TorchLSTM(nn.Module, BaseModelTorch):
     """
     Basic LSTM (RNN) for day-ahead timeseries forecasting.
     """
@@ -63,38 +63,6 @@ class TorchLSTM(nn.Module, System):
         out = self.fc(out)  # Final Output
 
         return out
-
-    def train(self):
-        tic = time.time()
-        running_loss = 0.0
-        for epoch in range(self.num_epochs):  # Iterate over number of epochs
-
-            outputs = self.forward(self.X_tensor)  # forward pass
-            self.optimizer.zero_grad()  # calculates the gradient, manually setting to 0
-
-            # obtain the loss function
-            loss = self.criterion(outputs, self.y_tensor)
-
-            loss.backward()  # calculates the loss of the loss function
-
-            self.optimizer.step()  # improve from loss, i.e., backpropagation
-
-            running_loss += loss.item() * self.X_tensor.size(0)
-            epoch_loss = running_loss / len(self.y_tensor)
-
-            if epoch % 100 == 0:
-                logging.info('-' * 20)
-                logging.info('Epoch: {}/{}'.format(epoch, self.num_epochs - 1))
-                logging.info("Loss: {:.4f}".format(epoch_loss))
-                logging.info('-' * 20)
-                # print("Epoch: {}, loss: {:4f}".format(epoch, loss.item()))
-            elif epoch == self.num_epochs - 1:
-                logging.info('-' * 20)
-                logging.info('-' * 20)
-                logging.info("Final loss: {:4f}".format(loss.item()))
-
-        tac = time.time() - tic
-        logging.info('Training complete in {:.0f}m {:.0f}s'.format(tac // 60, tac % 60))
 
     def predict(self):
         pass
