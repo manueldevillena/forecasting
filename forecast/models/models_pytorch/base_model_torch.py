@@ -17,31 +17,32 @@ class BaseModelTorch(BaseModel):
         """
         pass
 
-    def train(self):
+    @staticmethod
+    def _train(model):  # TODO: fix this (parent class)
         tic = time.time()
         running_loss = 0.0
-        for epoch in range(self.num_epochs):  # Iterate over number of epochs
+        for epoch in range(model.num_epochs):  # Iterate over number of epochs
 
-            outputs = self.forward(self.X_tensor)  # forward pass
-            self.optimizer.zero_grad()  # calculates the gradient, manually setting to 0
+            outputs = model.forward(model.X_tensor)  # forward pass
+            model.optimizer.zero_grad()  # calculates the gradient, manually setting to 0
 
             # obtain the loss function
-            loss = self.criterion(outputs, self.y_tensor)
+            loss = model.criterion(outputs, model.y_tensor)
 
             loss.backward()  # calculates the loss of the loss function
 
-            self.optimizer.step()  # improve from loss, i.e., backpropagation
+            model.optimizer.step()  # improve from loss, i.e., backpropagation
 
-            running_loss += loss.item() * self.X_tensor.size(0)
-            epoch_loss = running_loss / len(self.y_tensor)
+            running_loss += loss.item() * model.X_tensor.size(0)
+            epoch_loss = running_loss / len(model.y_tensor)
 
             if epoch % 100 == 0:
                 logging.info('-' * 20)
-                logging.info('Epoch: {}/{}'.format(epoch, self.num_epochs - 1))
+                logging.info('Epoch: {}/{}'.format(epoch, model.num_epochs - 1))
                 logging.info("Loss: {:.4f}".format(epoch_loss))
                 logging.info('-' * 20)
                 # print("Epoch: {}, loss: {:4f}".format(epoch, loss.item()))
-            elif epoch == self.num_epochs - 1:
+            elif epoch == model.num_epochs - 1:
                 logging.info('-' * 20)
                 logging.info('-' * 20)
                 logging.info("Final loss: {:4f}".format(loss.item()))

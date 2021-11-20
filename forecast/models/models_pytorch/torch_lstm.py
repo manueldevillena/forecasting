@@ -64,5 +64,11 @@ class TorchLSTM(nn.Module, BaseModelTorch):
 
         return out
 
+    def train(self):
+        """
+        Train
+        """
+        super()._train(self)
+
     def predict(self):
         pass
