@@ -18,7 +18,7 @@ class BaseModelTorch(BaseModel):
         pass
 
     @staticmethod
-    def _train(model):  # TODO: fix this (parent class)
+    def _train(model):
         tic = time.time()
         running_loss = 0.0
         for epoch in range(model.num_epochs):  # Iterate over number of epochs
