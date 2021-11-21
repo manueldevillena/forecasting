@@ -42,10 +42,14 @@ class FeatureCreation(ForecastInputData):
         X_train, y_train, X_test, y_test = self._split_train_test(X_scaled, y_scaled)
 
         features = {
+            'X_scaled': X_scaled,
+            'y_scaled': y_scaled,
             'X_train': X_train,
             'y_train': y_train,
             'X_test': X_test,
-            'y_test': y_test
+            'y_test': y_test,
+            'X_scaler': self.scaler_inputs,
+            'y_scaler': self.scaler_targets
         }
 
         return features
@@ -83,7 +87,6 @@ class FeatureCreation(ForecastInputData):
         Args:
             X: Inputs
             y: Targets
-            percentage_train: Percentage of train set
 
         Returns:
             Splits X_train, y_train, X_test, y_test

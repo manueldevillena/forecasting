@@ -20,20 +20,21 @@ class TorchLSTM(nn.Module, BaseModelTorch):
         Args:
             features: Object with appropriate configuration files.
         """
-        super().__init__()
-        for attr in ['size_output', 'num_layers', 'size_input', 'size_hidden',
-                     'learning_rate', 'num_epochs', 'optimizer', 'criterion',
-                     'X_train', 'y_train', 'X_test', 'y_test']:
-            if attr not in features.config and attr not in features.features:
-                raise KeyError('Attribute "{}" is mandatory in the configuration file.'.format(attr))
-            else:
-                if attr in features.config:
-                    setattr(self, attr, features.config[attr])
-                else:
-                    setattr(self, attr, features.features[attr])
+        nn.Module.__init__(self)
+        BaseModelTorch.__init__(self, features)
+        # for attr in ['size_output', 'num_layers', 'size_input', 'size_hidden',
+        #              'learning_rate', 'num_epochs', 'optimizer', 'criterion',
+        #              'X_train', 'y_train', 'X_test', 'y_test']:
+        #     if attr not in features.config and attr not in features.features:
+        #         raise KeyError('Attribute "{}" is mandatory in the configuration file.'.format(attr))
+        #     else:
+        #         if attr in features.config:
+        #             setattr(self, attr, features.config[attr])
+        #         else:
+        #             setattr(self, attr, features.features[attr])
 
-        self.X_tensor, self.y_tensor = self.create_tensors(self.X_train, self.y_train)
-        self.seq_length = self.X_tensor.shape[1]
+        # self.X_tensor, self.y_tensor = self.create_tensors(self.X_train, self.y_train)
+        self.seq_length = self.X_train_tensor.shape[1]
 
         self.lstm = nn.LSTM(input_size=self.size_input, hidden_size=self.size_hidden, num_layers=self.num_layers,
                             batch_first=True)
@@ -66,9 +67,12 @@ class TorchLSTM(nn.Module, BaseModelTorch):
 
     def train(self):
         """
-        Train
+        Trains.
         """
         super()._train(self)
 
     def predict(self):
-        pass
+        """
+        Predicts.
+        """
+        super()._predict(self)
