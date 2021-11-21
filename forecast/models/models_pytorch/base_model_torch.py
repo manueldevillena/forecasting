@@ -83,37 +83,18 @@ class BaseModelTorch(BaseModel, ABC):
         if x_test is not None: # TODO: take care of this case
             pass
         else:
-            prediction_torch_scaled = model.forward(self.X_scaled)
+            prediction_torch_scaled = model.forward(self.X_tensor)
             prediction_numpy_scaled = prediction_torch_scaled.data.numpy()
             true_values_numpy_scaled = self.y_tensor.data.numpy()
 
-            prediction_numpy = self.y_scaler(prediction_numpy_scaled)
-            true_values_numpy = self.y_scaler(true_values_numpy_scaled)
+            prediction_numpy = self.y_scaler.inverse_transform(prediction_numpy_scaled)
+            true_values_numpy = self.y_scaler.inverse_transform(true_values_numpy_scaled)
 
-            return prediction_numpy, true_values_numpy
-
-    @staticmethod
-    def create_tensors(X_train, y_train): #, X_test, y_test):
-        """
-        Creates torch tensors for torch models.
-
-        Args:
-            X_train: Array with inputs to train
-            y_train: Array with targets to train
-            X_test: Array with inputs to test
-            y_test: Array with target to test
-        Returns:
-            Torch tensors for X_train, y_train, X_test, and y_test
-        """
-        X_train_tensors = Variable(torch.Tensor(X_train))
-        # X_test_tensors = Variable(torch.Tensor(X_test))
-        y_train_tensors = Variable(torch.Tensor(y_train))
-        # y_test_tensors = Variable(torch.Tensor(y_test))
-
-        X_train_tensors_reshaped = torch.reshape(X_train_tensors, (X_train_tensors.shape[0], 1, X_train_tensors.shape[1]))
-        # X_test_tensors_reshaped = torch.reshape(X_test_tensors, (X_test_tensors.shape[0], 1, X_test_tensors.shape[1]))
-
-        return X_train_tensors_reshaped, y_train_tensors  #, X_test_tensors_reshaped, y_test_tensors
+        data_to_plot = {
+            'prediction_numpy': prediction_numpy,
+            'true_values_numpy': true_values_numpy
+        }
+        return data_to_plot
 
     @staticmethod
     def _create_X_tensor(X_array: np.array) -> torch.Tensor:
