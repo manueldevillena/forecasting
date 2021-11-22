@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from forecast.core import FeatureCreation, Metrics, Plotter
+from forecast.core import FeatureCreation, Plotter
 from forecast.models import TorchLSTM
 
 

@@ -1,1 +1,1 @@
-from .test_torch_lstm import TestTorchLSTM
+from .test_torch import TestTorchLSTM

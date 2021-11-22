@@ -1,14 +1,9 @@
-import torch
-import torch.nn as nn
-
-from torch.autograd import Variable
-
 from forecast.core import FeatureCreation
 from forecast.models.models_pytorch import BaseModelTorch
 from forecast.utils import infer_optimizer, infer_criterion
 
 
-class TorchLSTM(nn.Module, BaseModelTorch):
+class TFSTM(BaseModelTorch):
     """
     Basic LSTM (RNN) for day-ahead timeseries forecasting.
     """
@@ -18,16 +13,12 @@ class TorchLSTM(nn.Module, BaseModelTorch):
         Args:
             features: Object with appropriate configuration files.
         """
-        nn.Module.__init__(self)
         BaseModelTorch.__init__(self, features)
 
         self.seq_length = self.X_train_tensor.shape[1]
 
         self.lstm = nn.LSTM(input_size=self.size_input, hidden_size=self.size_hidden, num_layers=self.num_layers_lstm,
                             batch_first=True)
-        # self.fc_1 = nn.Linear(self.size_hidden, 128)
-        # self.fc = nn.Linear(128, self.size_output)
-        # self.relu = nn.ReLU()
         self.linear_layers = self.create_linear_net()
         self.net = nn.Sequential(*self.linear_layers)
 

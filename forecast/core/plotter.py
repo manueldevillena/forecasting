@@ -26,7 +26,7 @@ class Plotter(Metrics):
         predicted_values = self.data_to_plot['predicted_values_numpy']
         length_data_set = len(actual_values)
         MAE = self.metrics['MAE']
-        MAPE = self.metrics['MAPE']
+        # MAPE = self.metrics['MAPE']
         MSE = self.metrics['MSE']
 
         fig = plt.figure(figsize=(10, 6))
@@ -35,8 +35,8 @@ class Plotter(Metrics):
         plt.plot(predicted_values, label='Predicted Data')
         plt.title('Day-Ahead Market Prices Prediction')
         plt.annotate('MAE: {:.2f}'.format(MAE), (int(length_data_set*0.8), int(max(actual_values)*0.7)))
-        plt.annotate('MAPE: {:.2f}'.format(MAPE), (int(length_data_set*0.8), int(max(actual_values)*0.6)))
-        plt.annotate('MSE: {:.2f}'.format(MSE), (int(length_data_set*0.8), int(max(actual_values)*0.5)))
+        # plt.annotate('MAPE: {:.2f}'.format(MAPE), (int(length_data_set*0.8), int(max(actual_values)*0.6)))
+        plt.annotate('MSE: {:.2f}'.format(MSE), (int(length_data_set*0.8), int(max(actual_values)*0.6)))
         plt.legend()
         fig.savefig(os.path.join(self.output_path, '{}.pdf'.format(name)))
 
