@@ -142,6 +142,7 @@ def create_linear_network(input_size, layers, activation):
 
     return net_layers
 
+
 def set_up_logger(path, log_in_file=True):
     """
     Sets up the logger.

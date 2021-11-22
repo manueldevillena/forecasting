@@ -8,6 +8,7 @@ from torch.autograd import Variable
 
 from forecast.core import FeatureCreation
 from forecast.models import BaseModel
+from forecast.utils import infer_activation
 
 
 class BaseModelTorch(BaseModel, ABC):
@@ -19,8 +20,8 @@ class BaseModelTorch(BaseModel, ABC):
         Constructor.
         """
         super().__init__()
-        for attr in ['size_output', 'num_layers', 'size_input', 'size_hidden',
-                     'learning_rate', 'num_epochs', 'optimizer', 'criterion',
+        for attr in ['size_output', 'num_layers_lstm', 'num_layers_linear', 'size_input', 'size_hidden',
+                     'activation_function', 'learning_rate', 'num_epochs', 'optimizer', 'criterion',
                      'X_train', 'y_train', 'X_test', 'y_test', 'X_scaled', 'y_scaled',
                      'X_scaler', 'y_scaler']:
             if attr not in features.config and attr not in features.features:
@@ -35,6 +36,8 @@ class BaseModelTorch(BaseModel, ABC):
         self.y_train_tensor = self._create_y_tensor(self.y_train)
         self.X_tensor = self._create_X_tensor(self.X_scaled)
         self.y_tensor = self._create_y_tensor(self.y_scaled)
+
+        self.activation = infer_activation(self.activation_function)
 
     @staticmethod
     def _train(model):
@@ -95,6 +98,23 @@ class BaseModelTorch(BaseModel, ABC):
             'actual_values_numpy': actual_values_numpy
         }
         return data_to_plot
+
+    def create_linear_net(self):
+        """
+        Creates the layers of the linear network.
+        """
+        net_layers = list()
+        input_size = self.size_hidden
+        for n_neurons in self.num_layers_linear:
+            net_layers.append(torch.nn.Linear(input_size, n_neurons))
+            net_layers.append(self.activation.__class__())
+
+            input_size = n_neurons
+
+        net_layers.append(torch.nn.Linear(n_neurons, self.size_output))
+        net_layers.append(self.activation.__class__())
+
+        return net_layers
 
     @staticmethod
     def _create_X_tensor(X_array: np.array) -> torch.Tensor:

@@ -5,8 +5,10 @@ scaler_targets: minmax
 
 size_output: 1
 size_input: 24
-size_hidden: 12
-num_layers: 1
+size_hidden: 256
+num_layers_lstm: 1
+num_layers_linear: [128, 256, 512, 256, 128]
+activation_function: relu
 
 num_epochs: 1000
 learning_rate: 0.001
