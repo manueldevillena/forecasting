@@ -22,8 +22,7 @@ class BaseModelTorch(BaseModel, ABC):
         super().__init__()
         for attr in ['size_output', 'num_layers_lstm', 'num_layers_linear', 'size_input', 'size_hidden',
                      'activation_function', 'learning_rate', 'num_epochs', 'optimizer', 'criterion',
-                     'X_train', 'y_train', 'X_test', 'y_test', 'X_scaled', 'y_scaled',
-                     'X_scaler', 'y_scaler']:
+                     'X', 'y', 'X_train_scaled', 'y_train_scaled', 'X_scaler', 'y_scaler']:
             if attr not in features.config and attr not in features.features:
                 raise KeyError('Attribute "{}" is mandatory in the configuration file.'.format(attr))
             else:
@@ -32,10 +31,10 @@ class BaseModelTorch(BaseModel, ABC):
                 else:
                     setattr(self, attr, features.features[attr])
 
-        self.X_train_tensor = self._create_X_tensor(self.X_train)
-        self.y_train_tensor = self._create_y_tensor(self.y_train)
-        self.X_tensor = self._create_X_tensor(self.X_scaled)
-        self.y_tensor = self._create_y_tensor(self.y_scaled)
+        self.X_train_tensor = self._create_X_tensor(self.X_train_scaled)
+        self.y_train_tensor = self._create_y_tensor(self.y_train_scaled)
+        self.X_tensor = self._create_X_tensor(self.X)
+        # self.y_tensor = self._create_y_tensor(self.y_scaled)
 
         self.activation = infer_activation(self.activation_function)
 
@@ -86,16 +85,16 @@ class BaseModelTorch(BaseModel, ABC):
         if x_test is not None:  # TODO: take care of this case
             pass
         else:
-            predicted_values_torch_scaled = model.forward(self.X_tensor)
+            X_scaled = self.X_scaler.fit_transform(self.X)
+            X_tensor = self._create_X_tensor(X_scaled)
+            predicted_values_torch_scaled = model.forward(X_tensor)
             predicted_values_numpy_scaled = predicted_values_torch_scaled.data.numpy()
-            actual_values_numpy_scaled = self.y_tensor.data.numpy()
 
             predicted_values_numpy = self.y_scaler.inverse_transform(predicted_values_numpy_scaled)
-            actual_values_numpy = self.y_scaler.inverse_transform(actual_values_numpy_scaled)
 
         data_to_plot = {
             'predicted_values_numpy': predicted_values_numpy,
-            'actual_values_numpy': actual_values_numpy
+            'actual_values_numpy': self.y
         }
         return data_to_plot
 

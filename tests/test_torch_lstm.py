@@ -26,4 +26,4 @@ class TestTorchLSTM(unittest.TestCase):
         model.train()
         predictions = model.predict()
         plot = Plotter(predictions, self.output, features)
-        plot.plot_predictions('test_day_ahead')
+        plot.plot_predictions('test_day_ahead', zoom=True)

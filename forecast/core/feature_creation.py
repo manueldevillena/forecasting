@@ -38,16 +38,14 @@ class FeatureCreation(ForecastInputData):
         Creates the features to be used in the training and testing.
         """
         X, y = self._define_inputs_targets()
-        X_scaled, y_scaled = self._scale_data(X, y)
-        X_train, y_train, X_test, y_test = self._split_train_test(X_scaled, y_scaled)
+        X_train, y_train, X_test, y_test = self._split_train_test(X, y)
+        X_train_scaled, y_train_scaled = self._scale_data(X_train, y_train)
 
         features = {
-            'X_scaled': X_scaled,
-            'y_scaled': y_scaled,
-            'X_train': X_train,
-            'y_train': y_train,
-            'X_test': X_test,
-            'y_test': y_test,
+            'X_train_scaled': X_train_scaled,
+            'y_train_scaled': y_train_scaled,
+            'X': X,
+            'y': y,
             'X_scaler': self.scaler_inputs,
             'y_scaler': self.scaler_targets
         }
@@ -72,15 +70,6 @@ class FeatureCreation(ForecastInputData):
 
         return X, y
 
-    def _scale_data(self, X, y) -> tuple:
-        """
-        Scales the features.
-        """
-        X_scaled = self.scaler_inputs.fit_transform(X)
-        y_scaled = self.scaler_targets.fit_transform(y)
-
-        return X_scaled, y_scaled
-
     def _split_train_test(self, X, y) -> tuple:
         """
         Splits the inputs and targets into train and test.
@@ -100,3 +89,15 @@ class FeatureCreation(ForecastInputData):
         y_test = y[indices_test]
 
         return X_train, y_train, X_test, y_test
+
+    def _scale_data(self, X_train, y_train) -> tuple:
+        """
+        Scales the features.
+        """
+        X_scaled = self.scaler_inputs.fit_transform(X_train)
+        y_scaled = self.scaler_targets.fit_transform(y_train)
+        # X_scaled = self.scaler_inputs.fit_transform(X)
+        # y_scaled = self.scaler_targets.fit_transform(y)
+
+        return X_scaled, y_scaled
+

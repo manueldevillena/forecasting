@@ -1,4 +1,4 @@
-from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 from forecast.core import FeatureCreation
 
 
@@ -14,11 +14,11 @@ class Metrics:
         self.percentage = features.config['pertentage_train']
         self.metrics = self._compute_metrics()
 
-    def _compute_metrics(self):
+    def _compute_metrics(self) -> dict:
         """
-
+        Computes metrics.
         Returns:
-
+            Dictionary with metrics
         """
         actual_values_all = self.data['actual_values_numpy']
         predicted_values_all = self.data['predicted_values_numpy']
@@ -28,8 +28,10 @@ class Metrics:
 
         MAE = mean_absolute_error(actual_values, predicted_values)
         MAPE = mean_absolute_percentage_error(actual_values, predicted_values)
+        MSE = mean_squared_error(actual_values, predicted_values)
 
         return {
             'MAE': MAE,
-            'MAPE': MAPE
+            'MAPE': MAPE,
+            'MSE': MSE
         }
