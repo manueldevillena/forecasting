@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 import os
-from forecast.core import FeatureCreation
+from forecast.core import FeatureCreation, Metrics
+
+plt.style.use('ggplot')
 
 
-class Plotter:
+class Plotter(Metrics):
     """
     Collection of methods to plot.
     """
@@ -11,19 +13,27 @@ class Plotter:
         """
         Constructor.
         """
+        super().__init__(data_to_plot, features)
         self.data_to_plot = data_to_plot
         self.output_path = output_path
         self.features = features
-        self.percentage = features.config['percentage']
 
-    def plot_predictions(self, name: str):
+    def plot_predictions(self, name: str = 'default'):
         """
         Plots predictions.
         """
+        actual_values = self.data_to_plot['actual_values_numpy']
+        predicted_values = self.data_to_plot['predicted_values_numpy']
+        length_data_set = len(actual_values)
+        MAE = self.metrics['MAE']
+        MAPE = self.metrics['MAPE']
+
         fig = plt.figure(figsize=(10, 6))
-        plt.axvline(x=int(self.percentage * len(indices)), c='r', linestyle='--')  # size of the training set
-        plt.plot(dataY_plot[int(self.percentage * len(indices)):], label='Actual Data')  # actual plot
-        plt.plot(data_predict[int(self.percentage * len(indices)):], label='Predicted Data')  # predicted plot
+        plt.axvline(x=int(self.percentage * length_data_set), c='r', linestyle='--')
+        plt.plot(actual_values, label='Actual Data')
+        plt.plot(predicted_values, label='Predicted Data')
         plt.title('Day-Ahead Market Prices Prediction')
+        plt.annotate('MAE: {:.2f}'.format(MAE), (int(length_data_set*0.8), int(max(actual_values)*0.8)))
+        plt.annotate('MAPE: {:.2f}'.format(MAPE), (int(length_data_set*0.8), int(max(actual_values)*0.7)))
         plt.legend()
-        fig.savefig(os.path.join(self.output_path), '{}.pdf'.format(name))
+        fig.savefig(os.path.join(self.output_path, '{}.pdf'.format(name)))

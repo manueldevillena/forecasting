@@ -74,25 +74,25 @@ class BaseModelTorch(BaseModel, ABC):
         tac = time.time() - tic
         logging.info('Training complete in {:.0f}m {:.0f}s'.format(tac // 60, tac % 60))
 
-    def _predict(self, model, x_test: object = None) -> np.array:
+    def _predict(self, model, x_test: object = None) -> dict:
         """
         Predicts using the trained model.
         Args:
             model: Model used to predict.
         """
-        if x_test is not None: # TODO: take care of this case
+        if x_test is not None:  # TODO: take care of this case
             pass
         else:
-            prediction_torch_scaled = model.forward(self.X_tensor)
-            prediction_numpy_scaled = prediction_torch_scaled.data.numpy()
-            true_values_numpy_scaled = self.y_tensor.data.numpy()
+            predicted_values_torch_scaled = model.forward(self.X_tensor)
+            predicted_values_numpy_scaled = predicted_values_torch_scaled.data.numpy()
+            actual_values_numpy_scaled = self.y_tensor.data.numpy()
 
-            prediction_numpy = self.y_scaler.inverse_transform(prediction_numpy_scaled)
-            true_values_numpy = self.y_scaler.inverse_transform(true_values_numpy_scaled)
+            predicted_values_numpy = self.y_scaler.inverse_transform(predicted_values_numpy_scaled)
+            actual_values_numpy = self.y_scaler.inverse_transform(actual_values_numpy_scaled)
 
         data_to_plot = {
-            'prediction_numpy': prediction_numpy,
-            'true_values_numpy': true_values_numpy
+            'predicted_values_numpy': predicted_values_numpy,
+            'actual_values_numpy': actual_values_numpy
         }
         return data_to_plot
 

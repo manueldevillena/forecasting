@@ -8,7 +8,7 @@ size_input: 24
 size_hidden: 12
 num_layers: 1
 
-num_epochs: 100
+num_epochs: 1000
 learning_rate: 0.001
 optimizer: adam
 criterion: mse

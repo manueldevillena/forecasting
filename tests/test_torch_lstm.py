@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from forecast.core import FeatureCreation, Plotter
+from forecast.core import FeatureCreation, Metrics, Plotter
 from forecast.models import TorchLSTM
 
 
@@ -25,5 +25,5 @@ class TestTorchLSTM(unittest.TestCase):
         model = TorchLSTM(features)
         model.train()
         predictions = model.predict()
-        Plotter(predictions, self.output)
-        Plotter.plot_predictions()
+        plot = Plotter(predictions, self.output, features)
+        plot.plot_predictions('test_day_ahead')

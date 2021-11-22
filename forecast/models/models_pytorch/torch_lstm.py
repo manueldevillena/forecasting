@@ -71,8 +71,8 @@ class TorchLSTM(nn.Module, BaseModelTorch):
         """
         super()._train(self)
 
-    def predict(self):
+    def predict(self) -> dict:
         """
         Predicts.
         """
-        super()._predict(self)
+        return super()._predict(self)
