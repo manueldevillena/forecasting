@@ -44,6 +44,7 @@ class BaseModelTF(BaseModel, ABC):
             model: Model to be trained
         """
         tic = time.time()
+        #  TODO: Train
         tac = time.time() - tic
         logging.info('Training complete in {:.0f}m {:.0f}s'.format(tac // 60, tac % 60))
 
@@ -58,7 +59,7 @@ class BaseModelTF(BaseModel, ABC):
         else:
             X_scaled = self.X_scaler.fit_transform(self.X)
             X_tensor = self._create_X_tensor(X_scaled)
-            predicted_values_torch_scaled = model.forward(X_tensor)
+            predicted_values_torch_scaled = model.forward(X_tensor) # TODO: call model
             predicted_values_numpy_scaled = predicted_values_torch_scaled.data.numpy()
 
             predicted_values_numpy = self.y_scaler.inverse_transform(predicted_values_numpy_scaled)

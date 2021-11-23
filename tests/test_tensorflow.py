@@ -2,10 +2,10 @@ import os
 import unittest
 
 from forecast.core import FeatureCreation, Plotter
-from forecast.models import TFSTM
+from forecast.models import TFLSTM
 
 
-class TestTorchLSTM(unittest.TestCase):
+class TestTF(unittest.TestCase):
     """
     Tests.
     """
