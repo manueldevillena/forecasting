@@ -22,7 +22,7 @@ class BaseModelTF(BaseModel, ABC):
                      'activation_function', 'learning_rate', 'num_epochs', 'optimizer', 'criterion',
                      'X', 'y', 'X_train_scaled', 'y_train_scaled', 'X_scaler', 'y_scaler']:
             if attr not in features.config and attr not in features.features:
-                raise KeyError('Attribute "{}" is mandatory in the configuration file.'.format(attr))
+                raise KeyError(f'Attribute "{attr}" is mandatory in the configuration file.')
             else:
                 if attr in features.config:
                     setattr(self, attr, features.config[attr])
@@ -46,7 +46,7 @@ class BaseModelTF(BaseModel, ABC):
         tic = time.time()
         #  TODO: Train
         tac = time.time() - tic
-        logging.info('Training complete in {:.0f}m {:.0f}s'.format(tac // 60, tac % 60))
+        logging.info(f'Training complete in {tac//60:.0f}m {tac%60:.0f}s')
 
     def _predict(self, model, x_test: object = None) -> dict:
         """

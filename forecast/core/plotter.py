@@ -34,11 +34,11 @@ class Plotter(Metrics):
         plt.plot(actual_values, label='Actual Data')
         plt.plot(predicted_values, label='Predicted Data')
         plt.title('Day-Ahead Market Prices Prediction')
-        plt.annotate('MAE: {:.2f}'.format(MAE), (int(length_data_set*0.8), int(max(actual_values)*0.7)))
-        # plt.annotate('MAPE: {:.2f}'.format(MAPE), (int(length_data_set*0.8), int(max(actual_values)*0.6)))
-        plt.annotate('MSE: {:.2f}'.format(MSE), (int(length_data_set*0.8), int(max(actual_values)*0.6)))
+        plt.annotate(f'MAE: {MAE:.2f}', (int(length_data_set*0.8), int(max(actual_values)*0.7)))
+        # plt.annotate(f'MAPE: {MAPE:.2f}', (int(length_data_set*0.8), int(max(actual_values)*0.6)))
+        plt.annotate(f'MSE: {MSE:.2f}', (int(length_data_set*0.8), int(max(actual_values)*0.6)))
         plt.legend()
-        fig.savefig(os.path.join(self.output_path, '{}.pdf'.format(name)))
+        fig.savefig(os.path.join(self.output_path, f'{name}.pdf'))
 
         if zoom:
             zoom = (int(self.percentage * length_data_set), int(self.percentage * length_data_set) + 120)
@@ -56,4 +56,4 @@ class Plotter(Metrics):
         plt.plot(predicted_values[zoom[0]:zoom[1]], label='Predicted Data')
         plt.title('Day-Ahead Market Prices Prediction')
         plt.legend()
-        fig.savefig(os.path.join(self.output_path, '{}_zoom.pdf'.format(name)))
+        fig.savefig(os.path.join(self.output_path, f'{name}_zoom.pdf'))

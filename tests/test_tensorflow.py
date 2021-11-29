@@ -22,7 +22,7 @@ class TestTF(unittest.TestCase):
         Runs torch lstm.
         """
         features = FeatureCreation(path_inputs=self.inputs, path_config=self.config)
-        model = TFSTM(features)
+        model = TFLSTM(features)
         model.train()
         predictions = model.predict()
         plot = Plotter(predictions, self.output, features)

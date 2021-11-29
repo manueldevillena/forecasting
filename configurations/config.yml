@@ -1,16 +1,16 @@
-shift: 24
+shift: 48
 pertentage_train: 0.7
 scaler_inputs: standard
 scaler_targets: minmax
 
 size_output: 1
-size_input: 24
+size_input: 48
 size_hidden: 72
 num_layers_lstm: 1
 num_layers_linear: [128, 64]
 activation_function: relu
 
-num_epochs: 100
+num_epochs: 1000
 learning_rate: 0.001
 optimizer: adam
 criterion: mse

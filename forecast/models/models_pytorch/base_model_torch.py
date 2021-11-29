@@ -24,7 +24,7 @@ class BaseModelTorch(BaseModel, ABC):
                      'activation_function', 'learning_rate', 'num_epochs', 'optimizer', 'criterion',
                      'X', 'y', 'X_train_scaled', 'y_train_scaled', 'X_scaler', 'y_scaler']:
             if attr not in features.config and attr not in features.features:
-                raise KeyError('Attribute "{}" is mandatory in the configuration file.'.format(attr))
+                raise KeyError(f'Attribute "{attr}" is mandatory in the configuration file.')
             else:
                 if attr in features.config:
                     setattr(self, attr, features.config[attr])
@@ -64,17 +64,17 @@ class BaseModelTorch(BaseModel, ABC):
 
             if epoch % 100 == 0:
                 logging.info('-' * 20)
-                logging.info('Epoch: {}/{}'.format(epoch, model.num_epochs - 1))
-                logging.info("Loss: {:.4f}".format(epoch_loss))
+                logging.info(f'Epoch: {epoch}/{model.num_epochs-1}')
+                logging.info(f'Loss: {epoch_loss:.4f}')
                 logging.info('-' * 20)
-                # print("Epoch: {}, loss: {:4f}".format(epoch, loss.item()))
+                # print(f'Epoch: {epoch}, loss: {loss.item():4f}'))
             elif epoch == model.num_epochs - 1:
                 logging.info('-' * 20)
                 logging.info('-' * 20)
-                logging.info("Final loss: {:4f}".format(loss.item()))
+                logging.info(f'Final loss: {loss.item():4f}')
 
         tac = time.time() - tic
-        logging.info('Training complete in {:.0f}m {:.0f}s'.format(tac // 60, tac % 60))
+        logging.info(f'Training complete in {tac//60:.0f}m {tac%60:.0f}s')
 
     def _predict(self, model, x_test: object = None) -> dict:
         """

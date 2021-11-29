@@ -25,9 +25,8 @@ class TorchLSTM(nn.Module, BaseModelTorch):
 
         self.lstm = nn.LSTM(input_size=self.size_input, hidden_size=self.size_hidden, num_layers=self.num_layers_lstm,
                             batch_first=True)
-        # self.fc_1 = nn.Linear(self.size_hidden, 128)
-        # self.fc = nn.Linear(128, self.size_output)
-        # self.relu = nn.ReLU()
+        #  TODO: ADD BATCHES
+
         self.linear_layers = self.create_linear_net()
         self.net = nn.Sequential(*self.linear_layers)
 
@@ -46,12 +45,7 @@ class TorchLSTM(nn.Module, BaseModelTorch):
         h_0 = Variable(torch.zeros(self.num_layers_lstm, x.size(0), self.size_hidden))  # hidden state initialise
         c_0 = Variable(torch.zeros(self.num_layers_lstm, x.size(0), self.size_hidden))  # internal state initialise
         output, (hn, cn) = self.lstm(x, (h_0, c_0))  # lstm with input, hidden, and internal state
-        hn = hn.view(-1, self.size_hidden)  # reshaping the data for Dense layer next
         out = self.net(output[:, -1, :])
-        # out = self.relu(hn)
-        # out = self.fc_1(out)  # first Dense
-        # out = self.relu(out)  # relu
-        # out = self.fc(out)  # Final Output
 
         return out
 

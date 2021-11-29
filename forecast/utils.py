@@ -160,7 +160,7 @@ def set_up_logger(path, log_in_file=True):
         for hdlr in rootLogger.handlers[:]:  # remove all old handlers
             rootLogger.removeHandler(hdlr)
     if log_in_file:
-        fileHandler = logging.FileHandler('{0}/logfile.log'.format(path))
+        fileHandler = logging.FileHandler(f'{path}/logfile.log')
         fileHandler.setFormatter(logFormatter)
         rootLogger.addHandler(fileHandler)
 
