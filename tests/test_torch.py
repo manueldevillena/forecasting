@@ -13,8 +13,8 @@ class TestTorch(unittest.TestCase):
         # Set the working directory to the root
         os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         self.inputs = 'data/da_2017_2020.csv'
-        self.config = 'configurations/config.yml'
-        self.output = 'tests/results'
+        self.config = 'configurations/config_torch.yml'
+        self.output = 'tests/results/torch'
         os.makedirs(self.output, exist_ok=True)
 
     def test_lstm(self):

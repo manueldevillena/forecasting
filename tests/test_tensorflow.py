@@ -2,7 +2,7 @@ import os
 import unittest
 
 from forecast.core import FeatureCreation, Plotter
-from forecast.models import TFFeedForward, TFLSTM
+from forecast.models import TFFeedForward
 
 
 class TestTF(unittest.TestCase):

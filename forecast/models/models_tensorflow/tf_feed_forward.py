@@ -7,7 +7,7 @@ import keras.layers as layers
 
 class TFFeedForward(tf.keras.Model, BaseModelTF):
     """
-    Basic LSTM (RNN) for day-ahead timeseries forecasting.
+    Feed forward network for day-ahead timeseries forecasting.
     """
     def __init__(self, features: FeatureCreation):
         """

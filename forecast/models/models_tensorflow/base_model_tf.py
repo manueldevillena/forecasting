@@ -8,6 +8,7 @@ from forecast.core import FeatureCreation
 from forecast.models import BaseModel
 import tensorflow as tf
 
+
 class BaseModelTF(BaseModel, ABC):
     """
     Collection of methods used by all tensorflow (with keras) models.
@@ -34,7 +35,7 @@ class BaseModelTF(BaseModel, ABC):
     @abc.abstractmethod
     @tf.function
     def train_step(self, x, y):
-        pass
+        raise NotImplementedError
 
     @staticmethod
     def _train(model):

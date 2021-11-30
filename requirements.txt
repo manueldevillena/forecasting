@@ -3,3 +3,7 @@ pandas
 matplotlib
 pyyaml
 sklearn
+pytorch
+# For mac
+tensorflow-macos
+tensorflow-metal

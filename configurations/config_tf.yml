@@ -10,7 +10,7 @@ num_layers_lstm: 1
 num_layers_linear: [128, 64]
 activation_function: relu
 
-num_epochs: 30
+num_epochs: 100
 learning_rate: 0.001
 optimizer: adam
 criterion: mse

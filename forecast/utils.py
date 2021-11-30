@@ -72,10 +72,11 @@ def infer_activation(activation: str, mode: str = 'pytorch'):
     return activations[activation.lower()]
 
 
-def infer_optimizer(model: object, mode: str='pytorch'):
+def infer_optimizer(model: object, mode: str = 'pytorch'):
     """
     Maps the optimizer string given to the appropriate optimizer.
     Args:
+        mode:
         model: Model with info of the optimizer to use
 
     Returns:
@@ -96,6 +97,7 @@ def infer_criterion(criterion: str, mode: str = 'pytorch'):
     """
     Maps the criterion string given to the appropriate criterion.
     Args:
+        mode:
         model: Model with info of the criterion to use
 
     Returns:
