@@ -52,10 +52,7 @@ class BaseModelTF(BaseModel, ABC):
 
             # Log every 10 epochs.
             if epoch % 10 == 0:
-                print(
-                    "Training loss for epoch %d: %.4f"
-                    % (epoch, float(loss_value))
-                )
+                print(f'Training loss for {epoch = } is {loss_value = :.4f}')
 
         tac = time.time() - tic
         logging.info(f'Training complete in {tac//60:.0f}m {tac%60:.0f}s')
