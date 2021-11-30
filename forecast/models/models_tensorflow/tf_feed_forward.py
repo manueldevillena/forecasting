@@ -1,9 +1,11 @@
 from forecast.core import FeatureCreation
 from forecast.models.models_tensorflow import BaseModelTF
 from forecast.utils import infer_optimizer, infer_criterion
+import tensorflow as tf
+import keras.layers as layers
 
 
-class TFFeedForward(BaseModelTF):
+class TFFeedForward(tf.keras.Model, BaseModelTF):
     """
     Basic LSTM (RNN) for day-ahead timeseries forecasting.
     """
@@ -13,19 +15,14 @@ class TFFeedForward(BaseModelTF):
         Args:
             features: Object with appropriate configuration files.
         """
-        super().__init__(self, features)
+        tf.keras.Model.__init__(self)
+        BaseModelTF.__init__(self, features)
 
-        self.seq_length = self.X_train_tensor.shape[1]
+        self.output_projection = layers.Dense(self.size_output)
+        self.optimizer = infer_optimizer(self, mode='tensorflow')
+        self.criterion = infer_criterion(self.criterion, mode='tensorflow')
 
-        self.lstm = nn.LSTM(input_size=self.size_input, hidden_size=self.size_hidden, num_layers=self.num_layers_lstm,
-                            batch_first=True)
-        self.linear_layers = self.create_linear_net()
-        self.net = nn.Sequential(*self.linear_layers)
-
-        self.optimizer = infer_optimizer(self)
-        self.criterion = infer_criterion(self.criterion)
-
-    def forward(self, x):
+    def call(self, x):
         """
         Forward pass through the neural network.
         Args:
@@ -34,8 +31,18 @@ class TFFeedForward(BaseModelTF):
         Returns:
             Outputs of the neural network pass.
         """
-        pass
+        x = layers.Flatten()(x)
+        x = self.output_projection(x)
+        return x
 
+    @tf.function
+    def train_step(self, x, y):
+        with tf.GradientTape() as tape:
+            output = self(x, training=True)
+            loss_value = self.criterion(y, output)
+        grads = tape.gradient(loss_value, self.trainable_weights)
+        self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
+        return loss_value
 
     def train(self):
         """

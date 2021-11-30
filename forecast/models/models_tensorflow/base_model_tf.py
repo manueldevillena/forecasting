@@ -3,11 +3,10 @@ import numpy as np
 import time
 
 from abc import ABC
-
+import abc
 from forecast.core import FeatureCreation
 from forecast.models import BaseModel
-from forecast.utils import infer_activation
-
+import tensorflow as tf
 
 class BaseModelTF(BaseModel, ABC):
     """
@@ -29,22 +28,34 @@ class BaseModelTF(BaseModel, ABC):
                 else:
                     setattr(self, attr, features.features[attr])
 
-        self.X_train_tensor = self._create_X_tensor(self.X_train_scaled)
-        self.y_train_tensor = self._create_y_tensor(self.y_train_scaled)
-        self.X_tensor = self._create_X_tensor(self.X)
-        # self.y_tensor = self._create_y_tensor(self.y_scaled)
+        self.train_dataset = tf.data.Dataset.from_tensor_slices((self.X_train_scaled, self.y_train_scaled)) \
+                                .shuffle(buffer_size=1024).batch(32)
 
-        self.activation = infer_activation(self.activation_function)
+    @abc.abstractmethod
+    @tf.function
+    def train_step(self, x, y):
+        pass
 
     @staticmethod
     def _train(model):
         """
-        Trains the pytorch model.
+        Trains the tensorflow model.
         Args:
             model: Model to be trained
         """
         tic = time.time()
-        #  TODO: Train
+        for epoch in range(model.num_epochs):
+            # Iterate over the batches of the dataset.
+            for step, (x_batch_train, y_batch_train) in enumerate(model.train_dataset):
+                loss_value = model.train_step(x_batch_train, y_batch_train)
+
+            # Log every 10 epochs.
+            if epoch % 10 == 0:
+                print(
+                    "Training loss for epoch %d: %.4f"
+                    % (epoch, float(loss_value))
+                )
+
         tac = time.time() - tic
         logging.info(f'Training complete in {tac//60:.0f}m {tac%60:.0f}s')
 
@@ -58,9 +69,9 @@ class BaseModelTF(BaseModel, ABC):
             pass
         else:
             X_scaled = self.X_scaler.fit_transform(self.X)
-            X_tensor = self._create_X_tensor(X_scaled)
-            predicted_values_torch_scaled = model.forward(X_tensor) # TODO: call model
-            predicted_values_numpy_scaled = predicted_values_torch_scaled.data.numpy()
+            X_tensor = self._create_tensor(X_scaled)
+            predicted_values_tf_scaled = model(X_tensor, training=False)
+            predicted_values_numpy_scaled = predicted_values_tf_scaled.numpy()
 
             predicted_values_numpy = self.y_scaler.inverse_transform(predicted_values_numpy_scaled)
 
@@ -70,32 +81,5 @@ class BaseModelTF(BaseModel, ABC):
         }
         return data_to_plot
 
-    def create_linear_net(self):
-        """
-        Creates the layers of the linear network.
-        """
-        pass
-
-    @staticmethod
-    def _create_X_tensor(X_array: np.array):
-        """
-        Creates a torch tensor from an array of inputs.
-        Args:
-            array: Input array to be converted to a tensor
-
-        Returns:
-            Inputs torch tensor
-        """
-        pass
-
-    @staticmethod
-    def _create_y_tensor(y_array: np.array):
-        """
-        Creates a torch tensor from an array of targets.
-        Args:
-            array: Target array to be converted to a tensor
-
-        Returns:
-            Target torch tensor
-        """
-        pass
+    def _create_tensor(self, input_array: np.array):
+        return tf.convert_to_tensor(input_array, dtype=tf.float32)

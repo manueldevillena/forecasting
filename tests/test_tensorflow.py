@@ -2,7 +2,7 @@ import os
 import unittest
 
 from forecast.core import FeatureCreation, Plotter
-from forecast.models import TFLSTM
+from forecast.models import TFFeedForward, TFLSTM
 
 
 class TestTF(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestTF(unittest.TestCase):
         os.chdir(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         self.inputs = 'data/da_2017_2020.csv'
         self.config = 'configurations/config_tf.yml'
-        self.output = 'tests/results'
+        self.output = 'tests/results/tf'
         os.makedirs(self.output, exist_ok=True)
 
     def test_lstm(self):
@@ -22,7 +22,7 @@ class TestTF(unittest.TestCase):
         Runs torch lstm.
         """
         features = FeatureCreation(path_inputs=self.inputs, path_config=self.config)
-        model = TFLSTM(features)
+        model = TFFeedForward(features)
         model.train()
         predictions = model.predict()
         plot = Plotter(predictions, self.output, features)

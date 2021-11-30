@@ -2,6 +2,7 @@ import logging
 import numpy as np
 import pandas as pd
 import torch
+import tensorflow as tf
 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
@@ -46,7 +47,7 @@ def read_config(inputs_path: str) -> dict:
     return data
 
 
-def infer_activation(activation: str):
+def infer_activation(activation: str, mode: str = 'pytorch'):
     """
     Maps the activation function to the given string.
     Args:
@@ -55,16 +56,23 @@ def infer_activation(activation: str):
     Returns:
         Activation function
     """
-    activations = {
-        'relu': torch.nn.ReLU(),
-        'sigmoid': torch.nn.Sigmoid(),
-        'tanh': torch.nn.Tanh()
-    }
+    if mode == 'pytorch':
+        activations = {
+            'relu': torch.nn.ReLU(),
+            'sigmoid': torch.nn.Sigmoid(),
+            'tanh': torch.nn.Tanh()
+        }
+    elif mode == 'tensorflow':
+        activations = {
+            'relu': tf.keras.layers.Activation('relu'),
+            'sigmoid': tf.keras.layers.Activation('sigmoid'),
+            'tanh': tf.keras.layers.Activation('tanh')
+        }
 
     return activations[activation.lower()]
 
 
-def infer_optimizer(model: object):
+def infer_optimizer(model: object, mode: str='pytorch'):
     """
     Maps the optimizer string given to the appropriate optimizer.
     Args:
@@ -73,13 +81,18 @@ def infer_optimizer(model: object):
     Returns:
         Optimizer to use
     """
-    optimizers = {
-        'adam': torch.optim.Adam(model.parameters(), lr=model.learning_rate)
-    }
+    if mode == 'pytorch':
+        optimizers = {
+            'adam': torch.optim.Adam(model.parameters(), lr=model.learning_rate)
+        }
+    elif mode == 'tensorflow':
+        optimizers = {
+            'adam': tf.optimizers.Adam(learning_rate=model.learning_rate)
+        }
     return optimizers[model.optimizer]
 
 
-def infer_criterion(criterion: str):
+def infer_criterion(criterion: str, mode: str = 'pytorch'):
     """
     Maps the criterion string given to the appropriate criterion.
     Args:
@@ -88,9 +101,14 @@ def infer_criterion(criterion: str):
     Returns:
         Criterion to use
     """
-    criteria = {
-        'mse': torch.nn.MSELoss()
-    }
+    if mode == 'pytorch':
+        criteria = {
+            'mse': torch.nn.MSELoss()
+        }
+    elif mode == 'tensorflow':
+        criteria = {
+            'mse': tf.losses.MeanSquaredError()
+        }
     return criteria[criterion]
 
 
