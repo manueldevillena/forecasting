@@ -2,14 +2,13 @@ import logging
 import numpy as np
 import time
 
-from abc import ABC
 import abc
 from forecast.core import FeatureCreation
 from forecast.models import BaseModel
 import tensorflow as tf
 
 
-class BaseModelTF(BaseModel, ABC):
+class BaseModelTF(BaseModel, abc.ABC):
     """
     Collection of methods used by all tensorflow (with keras) models.
     """

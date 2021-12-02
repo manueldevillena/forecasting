@@ -4,6 +4,7 @@ import pandas as pd
 import torch
 import tensorflow as tf
 
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 import yaml
@@ -189,3 +190,20 @@ def set_up_logger(path, log_in_file=True):
     rootLogger.addHandler(consoleHandler)
     rootLogger.setLevel(logging.INFO)
     return rootLogger
+
+
+def compute_metrics(y, y_prime):
+    """
+    Computes metrics MAE, MAPE, MSE.
+    Args:
+        y: actual targets
+        y_prime: predicted targets
+
+    Returns:
+        Dictionary with metrics
+    """
+    return {
+        'MAE': mean_absolute_error(y, y_prime),
+        'MAPE': mean_absolute_percentage_error(y, y_prime),
+        'MSE': mean_squared_error(y, y_prime)
+    }
