@@ -1,13 +1,14 @@
-shift: 48
+shift: 24
+multi_step_forecast: 24
 percentage_train: 0.6
 percentage_validation: 0.2
 scaler_inputs: standard
 scaler_targets: minmax
 
-size_output: 1
-size_input: 48
+size_input: 24
+size_output: 24
 size_hidden: 72
-num_layers_lstm: 3
+num_layers_lstm: 2
 num_layers_linear: [128, 64]
 activation_function: relu
 

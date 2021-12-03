@@ -19,6 +19,7 @@ class FeatureCreation(ForecastInputData):
         """
         super().__init__(path_inputs, path_config)
         self.shift = self.config['shift']
+        self.multi_step_forecast = self.config['multi_step_forecast']
         self.percentage_train = self.config['percentage_train']
         self.percentage_validation = self.config['percentage_validation']
         self.percentage_validation_corrected = self.config['percentage_validation'] / (1 - self.percentage_train)
@@ -60,17 +61,25 @@ class FeatureCreation(ForecastInputData):
         """
         Creates features.
         """
+        if self.shift < self.multi_step_forecast:
+            raise f"The minimum number of time steps to shift must be equal to {self.multi_step_forecast}"
+        if self.multi_step_forecast > 0:
+            y_columns = pd.DataFrame()
+            for t in range(self.multi_step_forecast):
+                y_columns[t] = self.X_raw.shift(periods=-self.shift-t)
+            y = y_columns.dropna(axis=0).values
+            if self.shift > self.multi_step_forecast:
+                y = y[:-(self.shift-self.multi_step_forecast)]
+        else:
+            raise "Only multi step forecast is supported currently."
+
         if self.shift > 0:
             X_columns = pd.DataFrame()
             for t in range(self.shift):
                 X_columns[t] = self.X_raw.shift(periods=-t)
-            y_column = self.y_raw.shift(periods=-t - 1)
-            X = X_columns.values[:-t - 1]
-            y = y_column.values[:-t - 1].reshape(-1, 1)
+            X = X_columns.dropna(axis=0).values[:-t - 1]
         else:
-            # TODO: add features in addition to shifting
-            X = self.X_raw.values
-            y = self.y_raw.values
+            raise "Only shifted values are accepted as features currently."
 
         return X, y
 

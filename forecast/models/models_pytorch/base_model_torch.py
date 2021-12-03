@@ -145,4 +145,5 @@ class BaseModelTorch(BaseModel, ABC):
             Target torch tensor
         """
         y_tensor = Variable(torch.Tensor(y_array))
+
         return y_tensor

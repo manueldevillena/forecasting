@@ -22,8 +22,8 @@ class Plotter(Metrics):
         Plots predictions.
         """
         percentage_train = self.features.percentage_train
-        actual_values = self.data_to_plot['actual_values_numpy']
-        predicted_values = self.data_to_plot['predicted_values_numpy']
+        actual_values = self.data_to_plot['actual_values_numpy'][:, 0]
+        predicted_values = self.data_to_plot['predicted_values_numpy'][:, 0]
         length_data_set = len(actual_values)
         metrics_train = self.metrics['metrics_train']
         metrics_val = self.metrics['metrics_val']
