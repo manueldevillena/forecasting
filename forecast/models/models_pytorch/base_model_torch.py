@@ -45,7 +45,7 @@ class BaseModelTorch(BaseModel, ABC):
         Args:
             model: Model to be trained
         """
-        tic = time.time()
+        tic = time.perf_counter()
         running_loss = 0.0
         for epoch in range(model.num_epochs):  # Iterate over number of epochs
 
@@ -73,7 +73,7 @@ class BaseModelTorch(BaseModel, ABC):
                 logging.info('-' * 20)
                 logging.info(f'Final loss: {loss.item():4f}')
 
-        tac = time.time() - tic
+        tac = time.perf_counter() - tic
         logging.info(f'Training complete in {tac//60:.0f}m {tac%60:.0f}s')
 
     def _predict(self, model, x_test: object = None) -> dict:
