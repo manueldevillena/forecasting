@@ -85,7 +85,7 @@ class BaseModelTorch(BaseModel, ABC):
         if x_test is not None:  # TODO: take care of this case
             pass
         else:
-            X_scaled = self.X_scaler.fit_transform(self.X)
+            X_scaled = self.X_scaler.transform(self.X)
             X_tensor = self._create_X_tensor(X_scaled)
             predicted_values_torch_scaled = model.forward(X_tensor)
             predicted_values_numpy_scaled = predicted_values_torch_scaled.data.numpy()

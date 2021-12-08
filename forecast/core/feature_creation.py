@@ -63,6 +63,7 @@ class FeatureCreation(ForecastInputData):
         """
         if self.shift < self.multi_step_forecast:
             raise f"The minimum number of time steps to shift must be equal to {self.multi_step_forecast}"
+
         if self.multi_step_forecast > 0:
             y_columns = pd.DataFrame()
             for t in range(self.multi_step_forecast):

@@ -50,7 +50,7 @@ class BaseModelSKLearn(BaseModel, ABC):
         if x_test is not None:  # TODO: take care of this case
             pass
         else:
-            X_scaled = self.X_scaler.fit_transform(self.X)
+            X_scaled = self.X_scaler.transform(self.X)
             predicted_values_scaled = model.model.predict(X_scaled)
 
             predicted_values = self.y_scaler.inverse_transform(predicted_values_scaled)

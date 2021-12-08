@@ -64,7 +64,7 @@ class BaseModelTF(BaseModel, abc.ABC):
         if x_test is not None:  # TODO: take care of this case
             pass
         else:
-            X_scaled = self.X_scaler.fit_transform(self.X)
+            X_scaled = self.X_scaler.transform(self.X)
             X_tensor = self._create_tensor(X_scaled)
             predicted_values_tf_scaled = model(X_tensor, training=False)
             predicted_values_numpy_scaled = predicted_values_tf_scaled.numpy()
