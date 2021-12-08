@@ -20,7 +20,7 @@ class BaseModelTorch(BaseModel, ABC):
         Constructor.
         """
         super().__init__()
-        for attr in ['size_output', 'num_layers_lstm', 'num_layers_linear', 'size_input', 'size_hidden',
+        for attr in ['size_output', 'num_layers_lstm', 'num_layers_linear', 'size_input', 'size_hidden', 'batch_size',
                      'activation_function', 'learning_rate', 'num_epochs', 'optimizer', 'criterion',
                      'X', 'y', 'X_train_scaled', 'y_train_scaled', 'X_scaler', 'y_scaler']:
             if attr not in features.config and attr not in features.features:

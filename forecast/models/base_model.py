@@ -12,7 +12,7 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def train(self, X: object, y: object):
+    def train(self):
         """
         Trains the neural network.
 

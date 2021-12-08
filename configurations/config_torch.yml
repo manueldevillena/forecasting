@@ -5,14 +5,15 @@ percentage_validation: 0.2
 scaler_inputs: standard
 scaler_targets: minmax
 
+batch_size: 32
 size_input: 96
 size_output: 24
 size_hidden: 72
-num_layers_lstm: 5
-num_layers_linear: [128, 64]
+num_layers_lstm: 2
+num_layers_linear: [64, 128, 256, 128, 64]
 activation_function: relu
 
-num_epochs: 1000
+num_epochs: 10000
 learning_rate: 0.001
 optimizer: adam
 criterion: mse
