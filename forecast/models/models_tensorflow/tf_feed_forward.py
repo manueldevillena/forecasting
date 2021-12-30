@@ -35,15 +35,6 @@ class TFFeedForward(tf.keras.Model, BaseModelTF):
         x = self.output_projection(x)
         return x
 
-    @tf.function
-    def train_step(self, x, y):
-        with tf.GradientTape() as tape:
-            output = self(x, training=True)
-            loss_value = self.criterion(y, output)
-        grads = tape.gradient(loss_value, self.trainable_weights)
-        self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
-        return loss_value
-
     def train(self):
         """
         Trains.

@@ -110,7 +110,8 @@ def infer_criterion(criterion: str, mode: str = 'pytorch'):
         }
     elif mode == 'tensorflow':
         criteria = {
-            'mse': tf.losses.MeanSquaredError()
+            'mse': tf.losses.MeanSquaredError(),
+            'mae': tf.losses.MeanAbsoluteError()
         }
     return criteria[criterion]
 

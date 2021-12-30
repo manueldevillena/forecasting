@@ -19,7 +19,7 @@ class BaseModelTF(BaseModel, abc.ABC):
         super().__init__()
         for attr in ['size_output', 'num_layers_lstm', 'num_layers_linear', 'size_input', 'size_hidden', 'batch_size',
                      'activation_function', 'learning_rate', 'num_epochs', 'optimizer', 'criterion',
-                     'X', 'y', 'X_train_scaled', 'y_train_scaled', 'X_scaler', 'y_scaler']:
+                     'X', 'y', 'X_train_scaled', 'y_train_scaled', 'X_scaler', 'y_scaler', 'X_val_scaled', 'y_val_scaled']:
             if attr not in features.config and attr not in features.features:
                 raise KeyError(f'Attribute "{attr}" is mandatory in the configuration file.')
             else:
@@ -27,13 +27,6 @@ class BaseModelTF(BaseModel, abc.ABC):
                     setattr(self, attr, features.config[attr])
                 else:
                     setattr(self, attr, features.features[attr])
-
-        self.train_dataset = tf.data.Dataset.from_tensor_slices((self.X_train_scaled, self.y_train_scaled)).batch(self.batch_size)
-
-    @abc.abstractmethod
-    @tf.function
-    def train_step(self, x, y):
-        raise NotImplementedError
 
     @staticmethod
     def _train(model):
@@ -43,14 +36,25 @@ class BaseModelTF(BaseModel, abc.ABC):
             model: Model to be trained
         """
         tic = time.perf_counter()
-        for epoch in range(model.num_epochs):
-            # Iterate over the batches of the dataset.
-            for step, (x_batch_train, y_batch_train) in enumerate(model.train_dataset):
-                loss_value = model.train_step(x_batch_train, y_batch_train)
-
-            # Log every 10 epochs.
-            if epoch % 10 == 0:
-                print(f'Training loss for {epoch = } is {loss_value = :.4f}')
+        model.compile(
+            optimizer=model.optimizer,  # Optimizer
+            # Loss function to minimize
+            loss=model.criterion,
+            # List of metrics to monitor
+            # metrics=[],
+        )
+        callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5)
+        history = model.fit(
+            model.X_train_scaled,
+            model.y_train_scaled,
+            batch_size=model.batch_size,
+            epochs=model.num_epochs,
+            # We pass some validation for
+            # monitoring validation loss and metrics
+            # at the end of each epoch
+            validation_data=(model.X_val_scaled, model.y_val_scaled),
+            callbacks=[callback]
+        )
 
         tac = time.perf_counter() - tic
         logging.info(f'Training complete in {tac//60:.0f}m {tac%60:.0f}s')
@@ -64,8 +68,7 @@ class BaseModelTF(BaseModel, abc.ABC):
         if x_test is not None:  # TODO: take care of this case
             pass
         else:
-            X_scaled = self.X_scaler.transform(self.X)
-            X_tensor = self._create_tensor(X_scaled)
+            X_tensor = self._create_tensor(self.X)
             predicted_values_tf_scaled = model(X_tensor, training=False)
             predicted_values_numpy_scaled = predicted_values_tf_scaled.numpy()
 

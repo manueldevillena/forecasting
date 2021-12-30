@@ -18,7 +18,7 @@ class BaseModelSKLearn(BaseModel, ABC):
         super().__init__()
         for attr in ['size_output', 'num_layers_lstm', 'num_layers_linear', 'size_input', 'size_hidden', 'batch_size',
                      'activation_function', 'learning_rate', 'num_epochs', 'optimizer', 'criterion',
-                     'X', 'y', 'X_train_scaled', 'y_train_scaled', 'X_scaler', 'y_scaler',
+                     'X', 'y', 'X_train_scaled', 'y_train_scaled', 'X_scaler', 'y_scaler', 'X_val_scaled', 'y_val_scaled',
                      'estimators', 'criterion_trees', 'max_depth', 'jobs']:
             if attr not in features.config and attr not in features.features:
                 raise KeyError(f'Attribute "{attr}" is mandatory in the configuration file.')
@@ -50,7 +50,7 @@ class BaseModelSKLearn(BaseModel, ABC):
         if x_test is not None:  # TODO: take care of this case
             pass
         else:
-            X_scaled = self.X_scaler.transform(self.X)
+            X_scaled = self.X
             predicted_values_scaled = model.model.predict(X_scaled)
 
             predicted_values = self.y_scaler.inverse_transform(predicted_values_scaled)
