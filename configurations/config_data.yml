@@ -1,0 +1,32 @@
+train_start_date: '2011-01-09 00:00:00'
+train_end_date: '2014-01-04 23:00:00'
+val_start_date: '2014-01-05 00:00:00'
+val_end_date: '2015-01-03 23:00:00'
+test_start_date: '2015-01-04 00:00:00'
+test_end_date: '2016-12-31 23:00:00'
+
+input_columns: [Prices, Generation forecast, System load forecast]
+target_columns: [Prices]
+
+info:
+  'Prices_input1':
+    'lag': 0
+    'shift': -24
+  'Prices_input2':
+    'lag': -144
+    'shift': -24
+  'Prices_input3':
+    'lag': 0
+    'shift': 13
+  'System load forecast_input1':
+    'lag': -1
+    'shift': 38
+  'Generation forecast_input1':
+    'lag': -1
+    'shift': 38
+  'Prices_target':
+    'lag': 13
+    'shift': 24
+
+scaler_inputs: standard
+scaler_targets: standard
