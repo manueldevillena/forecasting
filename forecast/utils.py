@@ -66,19 +66,10 @@ def scale_data(X, scaler, train=False) -> np.ndarray:
     """
     Scales features.
     """
-    if isinstance(scaler, dict):
-        scaled = np.empty(shape=X.shape)
-        scaled[:] = np.nan
-        for i in range(X.shape[-1]):
-            if train:
-                scaled[:, :, i] = scaler[i].fit_transform(X[:, :, i])
-            else:
-                scaled[:, :, i] = scaler[i].transform(X[:, :, i])
+    if train:
+        scaled = scaler.fit_transform(X)
     else:
-        if train:
-            scaled = scaler.fit_transform(X)
-        else:
-            scaled = scaler.transform(X)
+        scaled = scaler.transform(X)
 
     return scaled
 
