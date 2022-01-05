@@ -1,0 +1,9 @@
+train_start_date: '2011-01-09 00:00:00'
+train_end_date: '2015-01-03 23:00:00'
+val_start_date: '2014-01-05 00:00:00'
+val_end_date: '2015-01-03 23:00:00'
+test_start_date: '2015-01-04 00:00:00'
+test_end_date: '2016-12-31 23:00:00'
+
+covariate_columns: null
+target_columns: [Prices]

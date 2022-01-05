@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 from forecast.core import ForecastInputData
-from forecast.utils import infer_scaler
-
+from forecast.utils import infer_scaler, read_config, scale_data
+import ast
 
 class InvalidInputsError(Exception):
     pass
@@ -14,21 +14,35 @@ class FeatureCreation(ForecastInputData):
     Creates the features.
     """
 
-    def __init__(self, path_inputs: str, path_config: str):
+    def __init__(self, path_inputs: str, path_config: str, train_start_date: str, train_end_date: str,
+                                   val_start_date: str, val_end_date: str,
+                                   test_start_date: str, test_end_date: str, freq: str = 'H'):
         """
         Constructor.
         """
-        super().__init__(path_inputs, path_config)
-        self.shift = self.config['shift']
-        self.multi_step_forecast = self.config['multi_step_forecast']
-        self.percentage_train = self.config['percentage_train']
-        self.percentage_validation = self.config['percentage_validation']
+        super().__init__(path_inputs, freq)
+        self.config = read_config(path_config)
+
+        self.train_start_date = train_start_date
+        self.train_end_date = train_end_date
+        self.val_start_date = val_start_date
+        self.val_end_date = val_end_date
+        self.test_start_date = test_start_date
+        self.test_end_date = test_end_date
+
+        self.train_df = self.raw_inputs[self.train_start_date:self.train_end_date]
+        self.val_df = self.raw_inputs[self.val_start_date:self.val_end_date]
+        self.test_df = self.raw_inputs[self.test_start_date:self.test_end_date]
+
+        self.info = self.config['info']
+        keys = list(self.info.keys())
+        self.df_dict = {}
 
         self.input_columns = self.config['input_columns']
         self.target_columns = self.config['target_columns']
 
         self.scaler_inputs = {}
-        for x in range(len(self.input_columns)):
+        for x in keys:
             self.scaler_inputs[x] = infer_scaler(self.config['scaler_inputs'])
 
         self.scaler_targets = infer_scaler(self.config['scaler_targets'])
@@ -38,178 +52,115 @@ class FeatureCreation(ForecastInputData):
         if len(self.target_columns) > 1:
             raise InvalidInputsError("Only one target variable supported")
 
-        if self.config['input_columns_with_known_future_values'] is None:
-            self.input_columns_with_known_future_values = []
-        else:
-            self.input_columns_with_known_future_values = self.config['input_columns_with_known_future_values']
-            if not set(self.input_columns_with_known_future_values).issubset(set(self.input_columns)):
-                raise InvalidInputsError("Input columns with known future values must be a subset of input columns")
+        self.features = {'y_scaler': None,
+                         'X_train_scaled': None,
+                         'y_train_scaled': None,
+                         'X_val_scaled': None,
+                         'y_val_scaled': None,
+                         'X_test_scaled': None,
+                         'y_test_scaled': None,
+                         'y_test': None}
 
-            self.scaler_inputs_with_known_future_values = {}
-            for x in range(len(self.input_columns_with_known_future_values)):
-                self.scaler_inputs_with_known_future_values[x] = infer_scaler(self.config['scaler_inputs'])
+    def _create_features(self, df: pd.DataFrame):
+        self.df_dict = {}
+        keys = list(self.info.keys())
+        LEN_DF = len(df)
+        for key in keys:
+            self.df_dict[key] = pd.DataFrame(data=np.nan, index=[x for x in range(LEN_DF)],
+                                        columns=[x for x in range(abs(self.info[key]['shift']))])
 
-        self.X_raw = self.data[self.input_columns]
-        self.y_raw = self.data[self.target_columns]
+        for i in range(LEN_DF):
+            condition = True
+            for key in keys:
+                if i + self.info[key]['lag'] + self.info[key]['shift'] < 0:
+                    condition = False
+                    break
+                if i + self.info[key]['lag'] + self.info[key]['shift'] > LEN_DF:
+                    condition = False
+                    break
+            if not condition:
+                continue
 
-        self.features = self._create_features()
+            for key in keys:
+                v1_ = i + self.info[key]['lag'] + self.info[key]['shift']
+                v2_ = i + self.info[key]['lag']
+                if v1_ > v2_:
+                    v1 = v2_
+                    v2 = v1_
+                else:
+                    v1 = v1_
+                    v2 = v2_
 
-    def _create_features(self) -> dict:
-        """
-        Creates the features to be used in the training, validation and testing.
-        """
-        X, C, y = self._define_inputs_targets()
-        X_train, C_train, y_train, X_val, C_val, y_val \
-            = self._split_set(X, C, y, self.percentage_train, self.percentage_validation)
+                col_name = key.split('_')[0]
+                self.df_dict[key].iloc[i, :] = df[col_name].iloc[v1:v2].transpose()
 
-        X_train_scaled = self._scale_x_data(X_train, self.scaler_inputs, mode='train')
-        y_train_scaled = self._scale_y_data(y_train, self.scaler_targets, mode='train')
+        for key in keys:
+            self.df_dict[key].dropna(axis=0, inplace=True)
 
-        X_val_scaled = self._scale_x_data(X_val, self.scaler_inputs, mode='val')
-        y_val_scaled = self._scale_y_data(y_val, self.scaler_targets, mode='val')
+    def _scale_and_format_features(self, train=False):
+        for key in list(self.df_dict.keys()):
+            if 'input' in key:
+                self.df_dict[key] = scale_data(self.df_dict[key].values, self.scaler_inputs[key], train=train)
+            if 'target' in key:
+                self.df_dict[key] = scale_data(self.df_dict[key].values, self.scaler_targets, train=train)
 
-        if C_train is None and C_val is None:
-            C_train_scaled = None
-            C_val_scaled = None
-        else:
-            C_train_scaled = self._scale_x_data(C_train, self.scaler_inputs_with_known_future_values, mode='train')
-            C_val_scaled = self._scale_x_data(C_val, self.scaler_inputs_with_known_future_values, mode='val')
+        return self._process_features()
 
-        X = self._scale_x_data(X, self.scaler_inputs, mode='val')
+    def _process_features(self):
+        X = None
+        for key in list(self.df_dict.keys()):
+            if 'input' in key:
+                if X is None:
+                    X = self.df_dict[key]
+                else:
+                    X = np.concatenate((X, self.df_dict[key]), axis=1)
+            if 'target' in key:
+                y = self.df_dict[key]
 
-        # notice, X has the shape (samples, past_length, number_of_input_columns),
-        # C has the shape (samples, future_length, number_of_input_columns_with_known_future_values) or None
-        # for now let us combine them together to get the shape
-        # (samples, past_length*number_of_input_columns + future_length*number_of_input_columns_with_known_future_values)
+        return X, y
 
-        X_train_scaled = X_train_scaled.reshape(-1, X_train_scaled.shape[1]*X_train_scaled.shape[2])
-        if C_train_scaled is None:
-            pass
-        else:
-            C_train_scaled = C_train_scaled.reshape(-1, C_train_scaled.shape[1] * C_train_scaled.shape[2])
-            X_train_scaled = np.concatenate((X_train_scaled, C_train_scaled), axis=1)
 
-        X_val_scaled = X_val_scaled.reshape(-1, X_val_scaled.shape[1] * X_val_scaled.shape[2])
-        if C_val_scaled is None:
-            pass
-        else:
-            C_val_scaled = C_val_scaled.reshape(-1, C_val_scaled.shape[1] * C_val_scaled.shape[2])
-            X_val_scaled = np.concatenate((X_val_scaled, C_val_scaled), axis=1)
+    def create_dataset(self, train_start_date: str = None, train_end_date: str = None,
+                       val_start_date: str = None, val_end_date: str = None,
+                       test_start_date: str = None, test_end_date: str = None,
+                       mode: str = 'test'):
 
-        X = X.reshape(-1, X.shape[1] * X.shape[2])
-        if C is None:
-            pass
-        else:
-            C = C.reshape(-1, C.shape[1] * C.shape[2])
-            X = np.concatenate((X, C), axis=1)
+        if train_start_date is not None and train_end_date is not None:
+            self.train_start_date = train_start_date
+            self.train_end_date = train_end_date
+        if val_start_date is not None and val_end_date is not None:
+            self.val_start_date = val_start_date
+            self.val_end_date = val_end_date
+        if test_start_date is not None and test_end_date is not None:
+            self.test_start_date = test_start_date
+            self.test_end_date = test_end_date
 
-        features = {
-            'X_train_scaled': X_train_scaled,
-            'y_train_scaled': y_train_scaled,
-            'X_val_scaled': X_val_scaled,
-            'y_val_scaled': y_val_scaled,
-            'X': X,
-            'y': y,
-            'X_scaler': self.scaler_inputs,
-            'y_scaler': self.scaler_targets
-        }
+        self.train_df = self.raw_inputs[self.train_start_date:self.train_end_date]
+        self.val_df = self.raw_inputs[self.val_start_date:self.val_end_date]
+        self.test_df = self.raw_inputs[self.test_start_date:self.test_end_date]
 
-        return features
-
-    def _define_inputs_targets(self):
-        """
-        Creates features.
-        """
-        X_return = None
-        C_return = None
-
-        features = pd.DataFrame()
-        for t in range(self.shift, self.shift + self.multi_step_forecast):
-            features[t] = self.y_raw[self.target_columns].shift(-t)
-        features.dropna(axis=0, inplace=True)
-        y_return = features.values
-
-        for i in self.input_columns:
-            features = pd.DataFrame()
-            for t in range(self.shift):
-                features[t] = self.X_raw[i].shift(-t)
-            features.dropna(axis=0, inplace=True)
-            features = np.expand_dims(features.values, axis=2)
-
-            if X_return is None:
-                X_return = features
-            else:
-                X_return = np.concatenate((X_return, features), axis=2)
-
-        X_return = X_return[:y_return.shape[0], :, :]
-
-        for i in self.input_columns_with_known_future_values:
-            features = pd.DataFrame()
-            for t in range(self.shift, self.shift + self.multi_step_forecast):
-                features[t] = self.X_raw[i].shift(-t)
-            features.dropna(axis=0, inplace=True)
-            features = np.expand_dims(features.values, axis=2)
-
-            if C_return is None:
-                C_return = features
-            else:
-                C_return = np.concatenate((C_return, features), axis=2)
-
-        return X_return, C_return, y_return
-
-    @staticmethod
-    def _split_set(X, C, y, percentage_train: float = 0.6, percentage_val: float = 0.2) -> tuple:
-        """
-        Splits the inputs and targets into train and test.
-        Args:
-            X: Inputs
-            y: Targets
-            percentage: percentage of train or validation sets
-
-        Returns:
-            Splits X_train, y_train, X_test, y_test
-        """
-        C_train = None
-        C_val = None
-
-        indices = list(range(len(X)))
-        p1 = int(percentage_train * len(indices))
-        p2 = int((percentage_train+percentage_val) * len(indices))
-        indices_train = indices[:p1]
-        indices_val = indices[p1:p2]
-
-        X_train = X[indices_train]
-        y_train = y[indices_train]
-        X_val = X[indices_val]
-        y_val = y[indices_val]
-
-        if C is not None:
-            C_train = C[indices_train]
-            C_val = C[indices_val]
-
-        return X_train, C_train, y_train, X_val, C_val, y_val
-
-    def _scale_x_data(self, X, scaler, mode='val') -> tuple:
-        """
-        Scales the input features.
-        """
-        scaled = np.empty(shape=X.shape)
-        scaled[:] = np.nan
-        for i in range(X.shape[-1]):
-            if mode == 'train':
-                scaled[:, :, i] = scaler[i].fit_transform(X[:, :, i])
-            else:
-                scaled[:, :, i] = scaler[i].transform(X[:, :, i])
-
-        return scaled
-
-    def _scale_y_data(self, y, scaler, mode='val') -> tuple:
-        """
-        Scales the input features.
-        """
         if mode == 'train':
-            scaled = scaler.fit_transform(y)
-        else:
-            scaled = scaler.transform(y)
+            self.features = { 'y_scaler': None,
+                             'X_train_scaled': None,
+                             'y_train_scaled': None,
+                             'X_val_scaled': None,
+                             'y_val_scaled': None,
+                             'X_test_scaled': None,
+                             'y_test_scaled': None,
+                             'y_test': None
+            }
 
-        return scaled
+            self._create_features(self.train_df)
+            self.features['X_train_scaled'], self.features['y_train_scaled'] = \
+                self._scale_and_format_features(train=True)
+            self.features['y_scaler'] = self.scaler_targets
+
+            self._create_features(self.val_df)
+            self.features['X_val_scaled'], self.features['y_val_scaled'] = \
+                self._scale_and_format_features(train=False)
+        else:
+            self._create_features(self.test_df)
+            self.features['y_test'] = self.df_dict[self.target_columns[0]+'_target'].values
+            self.features['X_test_scaled'], self.features['y_test_scaled'] = \
+                self._scale_and_format_features(train=False)
+

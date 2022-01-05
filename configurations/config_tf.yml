@@ -1,23 +1,6 @@
-shift: 168
-multi_step_forecast: 24
-input_columns: [Price,Ampirion Load Forecast,PV+Wind Forecast]
-target_columns: [Price]
-input_columns_with_known_future_values: null
-
-percentage_train: 0.6
-percentage_validation: 0.2
-scaler_inputs: standard
-scaler_targets: standard
-
 batch_size: 32
-size_input: 168
 size_output: 24
-size_hidden: 72
-num_layers_lstm: 1
-num_layers_linear: [256, 128, 64]
-activation_function: relu
-
-num_epochs: 40
-learning_rate: 0.0005
+num_epochs: 1
+learning_rate: 0.00005
 optimizer: adam
 criterion: mae

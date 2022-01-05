@@ -23,6 +23,20 @@ class ParsingException(Exception):
         return "Invalid values at indexes:\n\t" + '\n\t'.join(map(str, self.indexes))
 
 
+class NoScaler():
+    def __init__(self):
+        pass
+
+    def fit_transform(self, x):
+        return x
+
+    def transform(self, x):
+        return x
+
+    def inverse_transform(self, x):
+        return x
+
+
 def read_inputs(data_path: str) -> pd.DataFrame:
     """
     Reads CSV file returning an object.
@@ -46,6 +60,27 @@ def read_config(inputs_path: str) -> dict:
     with open(inputs_path) as infile:
         data = yaml.load(infile, Loader=Loader)
     return data
+
+
+def scale_data(X, scaler, train=False) -> np.ndarray:
+    """
+    Scales features.
+    """
+    if isinstance(scaler, dict):
+        scaled = np.empty(shape=X.shape)
+        scaled[:] = np.nan
+        for i in range(X.shape[-1]):
+            if train:
+                scaled[:, :, i] = scaler[i].fit_transform(X[:, :, i])
+            else:
+                scaled[:, :, i] = scaler[i].transform(X[:, :, i])
+    else:
+        if train:
+            scaled = scaler.fit_transform(X)
+        else:
+            scaled = scaler.transform(X)
+
+    return scaled
 
 
 def infer_activation(activation: str, mode: str = 'pytorch'):
@@ -127,7 +162,8 @@ def infer_scaler(scaler):
     """
     scalers = {
         'standard': StandardScaler(),
-        'minmax': MinMaxScaler()
+        'minmax': MinMaxScaler(),
+        'noscaler': NoScaler()
     }
     return scalers[scaler]
 

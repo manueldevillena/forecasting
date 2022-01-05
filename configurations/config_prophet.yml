@@ -1,0 +1,4 @@
+daily_seasonality: False
+weekly_seasonality: False
+yearly_seasonality: True
+

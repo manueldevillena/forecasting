@@ -1,28 +1,4 @@
-shift: 168
-multi_step_forecast: 24
-percentage_train: 0.6
-percentage_validation: 0.2
-input_columns: [DAMprice]
-target_columns: [DAMprice]
-input_columns_with_known_future_values: null
-
-scaler_inputs: standard
-scaler_targets: standard
-
-batch_size: 32
-size_input: 96
-size_output: 24
-size_hidden: 72
-num_layers_lstm: 2
-num_layers_linear: [64, 128, 256, 128, 64]
-activation_function: relu
-
-num_epochs: 10000
-learning_rate: 0.001
-optimizer: adam
-criterion: mse
-
-estimators: 1000
+estimators: 10
 criterion_trees: mse
-max_depth: 30
+max_depth: 2
 jobs: -1

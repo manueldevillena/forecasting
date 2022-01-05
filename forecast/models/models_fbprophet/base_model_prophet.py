@@ -1,15 +1,18 @@
 import logging
 import numpy as np
 import time
+import abc
 
-from abc import ABC
-from forecast.core import FeatureCreation
+import pandas as pd
+
 from forecast.models import BaseModel
+from prophet.plot import plot_plotly, plot_components_plotly
+import matplotlib.pyplot as plt
 
 
-class BaseModelSKLearn(BaseModel, ABC):
+class BaseModelProphet(BaseModel, abc.ABC):
     """
-    Collection of methods used by all sklearn models.
+    Collection of methods used by all tensorflow (with keras) models.
     """
     def __init__(self):
         """
@@ -18,24 +21,22 @@ class BaseModelSKLearn(BaseModel, ABC):
         super().__init__()
 
     @staticmethod
-    def _train(model, dataset_dict):
+    def _train(model, dataset):
         """
-        Trains the pytorch model.
+        Trains the tensorflow model.
         Args:
             model: Model to be trained
         """
         tic = time.perf_counter()
-        model.fit(dataset_dict['X_train_scaled'], dataset_dict['y_train_scaled'])
-
+        model.fit(dataset['train_df'])
         tac = time.perf_counter() - tic
         logging.info(f'Training complete in {tac//60:.0f}m {tac%60:.0f}s')
 
-    def _predict(self, model, dataset_dict):
+    def _predict(self, model, dataset):
         """
         Predicts using the trained model.
         Args:
             model: Model used to predict.
         """
-        predicted_values = model.predict(dataset_dict['X_test_scaled'])
-
-        return predicted_values
+        df = model.predict(dataset['test_df'])
+        return df
